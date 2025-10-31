@@ -98,6 +98,23 @@ USER_SCENARIOS = {
     },
 }
 
+def check_password():
+    """Returns `True` if the user had the correct password."""
+    def password_entered():
+        if st.session_state["password"] == st.secrets["password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if st.session_state.get("password_correct", False):
+        return True
+
+    st.text_input("Password", type="password", on_change=password_entered, key="password")
+    if "password_correct" in st.session_state:
+        st.error("😕 Password incorrect")
+    return False
+
 @dataclass
 class UserProfile:
     """User's adaptive topic preferences"""
@@ -372,6 +389,9 @@ SEED_CHANNELS = [
 
 def main():
     st.set_page_config(page_title="Channel Ranking Prototype", layout="wide")
+    
+    if not check_password():
+        st.stop()
     
     st.title("🎯 Adaptive Channel Personalization")
     st.markdown("Adjust user topic preferences and see how channel rankings update in real-time.")
